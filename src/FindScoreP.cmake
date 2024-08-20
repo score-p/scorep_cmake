@@ -17,7 +17,7 @@
 include(FindPackageHandleStandardArgs)
 
 # internal function for calling scorep-config and extracting version and prefix
-function(_scorep_determine_config scorepConfigExecutable versionVar prefixVar)
+function(_scorep_determine_config scorepConfigExecutable versionVar prefixVar successfulVar)
     # Avoid querying the version if we've already done that this run.
     # This is an internal property inspired by the FindGit module and
     # not stored in the cache because it might change between CMake runs.
@@ -29,6 +29,7 @@ function(_scorep_determine_config scorepConfigExecutable versionVar prefixVar)
         if (cachedConfigExecutable STREQUAL scorepConfigExecutable AND (NOT version STREQUAL "") AND (NOT prefix STREQUAL ""))
             set("${versionVar}" "${version}" PARENT_SCOPE)
             set("${prefixVar}" "${prefix}" PARENT_SCOPE)
+            set("${successfulVar}" TRUE PARENT_SCOPE)
             return()
         endif()
     endif()
@@ -44,6 +45,7 @@ function(_scorep_determine_config scorepConfigExecutable versionVar prefixVar)
             if (NOT ${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
                 message(NOTICE "scorep-config failed with result ${result}")
             endif()
+            set("${successfulVar}" FALSE PARENT_SCOPE)
             return()
         endif()
     endforeach()
@@ -55,6 +57,7 @@ function(_scorep_determine_config scorepConfigExecutable versionVar prefixVar)
     )
     set("${versionVar}" "${version}" PARENT_SCOPE)
     set("${prefixVar}" "${prefix}" PARENT_SCOPE)
+    set("${successfulVar}" TRUE PARENT_SCOPE)
 endfunction()
 
 
@@ -225,41 +228,40 @@ function(_scorep_version_validator resultVariable scorepConfigPath)
     if ((NOT DEFINED ${CMAKE_FIND_PACKAGE_NAME}_FIND_VERSION) AND "${${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS}" STREQUAL "")
         set(${resultVariable} TRUE PARENT_SCOPE)
     else()
-        execute_process(
-            COMMAND "${scorepConfigPath}" --version
-            RESULT_VARIABLE versionResult
-            OUTPUT_VARIABLE version
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        if (versionResult STREQUAL "0")
+        _scorep_determine_config("${scorepConfigPath}" version prefix success)
+        if(success)
             find_package_check_version("${version}" versionValid HANDLE_VERSION_RANGE)
-            if (versionValid)
-                _scorep_determine_config("${scorepConfigPath}" version prefix)
-                if(prefix)
-                    unset(scorepInfoExecutable)
-                    find_program(
-                        scorepInfoExecutable
-                        NAMES scorep-info
-                        PATHS "${prefix}/bin"
-                        NO_DEFAULT_PATH
-                        NO_CACHE
-                    )
-                    if(scorepInfoExecutable)
-                        _scorep_check_components("${scorepInfoExecutable}" hasComponents)
-                        if(hasComponents)
-                            set(${resultVariable} TRUE PARENT_SCOPE)
-                            return()
-                        endif()
-                    endif()
+            if(versionValid)
+                find_program(
+                    scorepInfoExecutable
+                    NAMES scorep-info
+                    PATHS "${prefix}/bin"
+                    NO_DEFAULT_PATH
+                    NO_CACHE
+                )
+                if(NOT scorepInfoExecutable STREQUAL "scorepInfoExecutable-NOTFOUND")
+                    _scorep_check_components("${scorepInfoExecutable}" hasComponents)
+                    set("${resultVariable}" "${hasComponents}" PARENT_SCOPE)
+                    return()
                 endif()
             endif()
-            set(${resultVariable} FALSE PARENT_SCOPE)
-        else()
-            if (NOT ${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
-                message(DEBUG "calling ${scorepConfigPath} failed with result ${versionResult}")
-            endif()
-            set(${resultVariable} FALSE PARENT_SCOPE)
         endif()
+        set("${resultVariable}" FALSE PARENT_SCOPE)
+    endif()
+endfunction()
+
+
+# Internal function which registers imported executable targets based on found programs.
+function(_scorep_register_targets variables targets)
+    get_property(role GLOBAL PROPERTY CMAKE_ROLE)
+    # only possible in 'PROJECT' role
+    if (role STREQUAL "PROJECT")
+        foreach(variable target IN ZIP_LISTS variables targets)
+            if (NOT (${variable} STREQUAL "${variable}-NOTFOUND" OR TARGET "${target}"))
+                add_executable("${target}" IMPORTED)
+                set_property(TARGET "${target}" PROPERTY IMPORTED_LOCATION "${${variable}}")
+            endif()
+        endforeach()
     endif()
 endfunction()
 
@@ -275,13 +277,13 @@ find_program(
 )
 mark_as_advanced(SCOREP_CONFIG_EXECUTABLE)
 
-if (SCOREP_CONFIG_EXECUTABLE)
+if (NOT SCOREP_CONFIG_EXECUTABLE STREQUAL "SCOREP_CONFIG_EXECUTABLE-NOTFOUND")
     if (NOT ${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
         message(CHECK_PASS "found ${SCOREP_CONFIG_EXECUTABLE}")
     endif()
-    _scorep_determine_config("${SCOREP_CONFIG_EXECUTABLE}" SCOREP_VERSION_STRING __scorepPrefix)
+    _scorep_determine_config("${SCOREP_CONFIG_EXECUTABLE}" SCOREP_VERSION_STRING __scorepPrefix __success)
 
-    if (__scorepPrefix) 
+    if (__success) 
         find_program(
             SCOREP_EXECUTABLE
             NAMES scorep
@@ -300,32 +302,21 @@ if (SCOREP_CONFIG_EXECUTABLE)
         mark_as_advanced(SCOREP_INFO_EXECUTABLE)
     endif()
     unset(__scorepPrefix)
+    unset(__success)
 elseif(NOT ${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
     message(CHECK_FAIL "not found")
 endif()
 
-if (SCOREP_INFO_EXECUTABLE)
+if (NOT SCOREP_INFO_EXECUTABLE STREQUAL "SCOREP_INFO_EXECUTABLE-NOTFOUND")
     # set components for find_package_handle_standard_args
     _scorep_check_components("${SCOREP_INFO_EXECUTABLE}" __hasComponents)
     unset(__hasComponents)
 endif()
 
-get_property(__findScorePRole GLOBAL PROPERTY CMAKE_ROLE)
-if (__findScorePRole STREQUAL "PROJECT")
-    if (SCOREP_CONFIG_EXECUTABLE AND NOT TARGET ScoreP::Config)
-        add_executable(ScoreP::Config IMPORTED)
-        set_property(TARGET ScoreP::Config PROPERTY IMPORTED_LOCATION "${SCOREP_CONFIG_EXECUTABLE}")
-    endif()
-    if (SCOREP_EXECUTABLE AND NOT TARGET ScoreP::ScoreP)
-        add_executable(ScoreP::ScoreP IMPORTED)
-        set_property(TARGET ScoreP::ScoreP PROPERTY IMPORTED_LOCATION "${SCOREP_EXECUTABLE}")
-    endif()
-    if (SCOREP_INFO_EXECUTABLE AND NOT TARGET Scorep::Info)
-        add_executable(ScoreP::Info IMPORTED)
-        set_property(TARGET ScoreP::Info PROPERTY IMPORTED_LOCATION "${SCOREP_INFO_EXECUTABLE}")
-    endif()
-endif()
-unset(__findScorePRole)
+_scorep_register_targets(
+    "SCOREP_EXECUTABLE;SCOREP_CONFIG_EXECUTABLE;SCOREP_INFO_EXECUTABLE"
+    "ScoreP::ScoreP;ScoreP::Config;ScoreP::Info"
+)
 
 find_package_handle_standard_args(
     ScoreP

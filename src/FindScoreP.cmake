@@ -222,7 +222,7 @@ function(_scorep_version_validator resultVariable scorepConfigPath)
     if (NOT ${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
         message(DEBUG "considering scorep-config in ${scorepConfigPath}...")
     endif()
-    if (NOT DEFINED ${CMAKE_FIND_PACKAGE_NAME}_FIND_VERSION)
+    if ((NOT DEFINED ${CMAKE_FIND_PACKAGE_NAME}_FIND_VERSION) AND "${${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS}" STREQUAL "")
         set(${resultVariable} TRUE PARENT_SCOPE)
     else()
         execute_process(

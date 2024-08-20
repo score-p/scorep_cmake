@@ -1,0 +1,4 @@
+#!/bin/sh
+# Dummy to simulate additional installations
+
+exit 0

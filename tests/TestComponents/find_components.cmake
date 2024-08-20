@@ -1,7 +1,7 @@
 foreach(component "DUMMY_COMPONENT" "COMPILER_C99_/usr/bin/dummy" "OMP_DUMMY")
     find_package(
         ScoreP
-        "0.0.0.3"
+        "0.0.0.1"
         EXACT
         COMPONENTS "${component}"
     )
@@ -14,7 +14,7 @@ endforeach()
 
 find_package(
     ScoreP
-    "0.0.0.3"
+    "0.0.0.1"
     EXACT
     REQUIRED
     COMPONENTS "COMPILER"
@@ -31,7 +31,7 @@ endif()
 
 find_package(
     ScoreP
-    "0.0.0.3"
+    "0.0.0.1"
     EXACT
     REQUIRED
     COMPONENTS

@@ -257,7 +257,7 @@ function(_scorep_register_targets variables targets)
     # only possible in 'PROJECT' role
     if (role STREQUAL "PROJECT")
         foreach(variable target IN ZIP_LISTS variables targets)
-            if (NOT (${variable} STREQUAL "${variable}-NOTFOUND" OR TARGET "${target}"))
+            if (DEFINED "${variable}" AND NOT (${variable} STREQUAL "${variable}-NOTFOUND" OR TARGET "${target}"))
                 add_executable("${target}" IMPORTED)
                 set_property(TARGET "${target}" PROPERTY IMPORTED_LOCATION "${${variable}}")
             endif()
@@ -307,7 +307,7 @@ elseif(NOT ${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
     message(CHECK_FAIL "not found")
 endif()
 
-if (NOT SCOREP_INFO_EXECUTABLE STREQUAL "SCOREP_INFO_EXECUTABLE-NOTFOUND")
+if (DEFINED SCOREP_INFO_EXECUTABLE AND NOT SCOREP_INFO_EXECUTABLE STREQUAL "SCOREP_INFO_EXECUTABLE-NOTFOUND")
     # set components for find_package_handle_standard_args
     _scorep_check_components("${SCOREP_INFO_EXECUTABLE}" __hasComponents)
     unset(__hasComponents)

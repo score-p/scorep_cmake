@@ -4,6 +4,7 @@
 
 namespace options = boost::program_options;
 
+#pragma acc routine seq
 static unsigned long fibonacci(unsigned long element) {
     unsigned long a = 0;
     unsigned long b = 1;
@@ -17,10 +18,12 @@ static unsigned long fibonacci(unsigned long element) {
 }
 
 static void calculate_elements(const unsigned int start, const unsigned int step, std::vector<unsigned long>* buffer) {
-    #pragma acc parallel copyout(buffer[0:buffer->size()])
+    unsigned int count = buffer->size();
+    unsigned long* data = buffer->data();
+    #pragma acc parallel copyout(data[0:count])
     #pragma acc loop
-    for (unsigned int index = 0; index < buffer->size(); index++) {
-        (*buffer)[index] = fibonacci(start + index * step);
+    for (unsigned int index = 0; index < count; index++) {
+        data[index] = fibonacci(start + index * step);
     }
 }
 

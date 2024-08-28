@@ -331,28 +331,31 @@ function(scorep_determine_instrumentations targets)
         # find the global set of this local set
         _scorep_unionfind_find(UNIONFIND "${localSet}" found)
 
-        # calculate language specific arguments
+        # calculate settings for all languages
+        foreach(setting IN LISTS _SCOREP_FLAG_SETTINGS _SCOREP_CHOICE_SETTINGS _SCOREP_UNION_SETTINGS)
+            # inherit global settings
+            set("LOCAL_${setting}" "${GLOBAL_${found}_${setting}}")
+        endforeach()
         foreach(language IN LISTS "LOCALSET_${localSet}_LANGUAGES")
-            foreach(setting IN LISTS _SCOREP_FLAG_SETTINGS _SCOREP_CHOICE_SETTINGS _SCOREP_UNION_SETTINGS)
-                # inherit global settings
-                set("LANGUAGE_${setting}" "${GLOBAL_${found}_${setting}}")
-            endforeach()
             foreach(dependency IN LISTS "LOCALSET_${localSet}_ELEMENTS")
                 _scorep_properties2settings(DEPENDENCY "${language}" "${dependency}")
-                # standalone settings where already merged by the global settings
+                # notstandalone settings where already merged by the global settings
                 foreach(setting IN LISTS _SCOREP_NOTSTANDALONE_FLAG_SETTINGS _SCOREP_NOTSTANDALONE_CHOICE_SETTINGS _SCOREP_NOTSTANDALONE_UNION_SETTINGS)
                     set("DEPENDENCY_${setting}" "")
                 endforeach()
-                _scorep_merge_settings(LANGUAGE DEPENDENCY LANGUAGE)
+                _scorep_merge_settings(LOCAL DEPENDENCY LOCAL)
             endforeach()
-
-            _scorep_settings2arguments(LANGUAGE "arguments_${language}")
-            if(ARG_COMPONENTS_VAR)
-                scorep_arguments2components("${arguments_${language}}" "${language}" targetComponents)
-                list(APPEND components ${targetComponents})
-                list(REMOVE_DUPLICATES components)
-            endif()
         endforeach()
+
+        # generate Score-P arguments
+        _scorep_settings2arguments(LOCAL arguments)
+        if(ARG_COMPONENTS_VAR)
+            foreach(language IN LISTS "LOCALSET_${localSet}_LANGUAGES")
+                scorep_arguments2components("${arguments}" "${language}" localComponents)
+                list(APPEND components ${localComponents})
+                list(REMOVE_DUPLICATES components)
+            endforeach()
+        endif()
 
         # instrument local set
         foreach(target IN LISTS "LOCALSET_${localSet}_ELEMENTS")
@@ -364,10 +367,10 @@ function(scorep_determine_instrumentations targets)
                         set_target_properties(
                             "${target}"
                             PROPERTIES "SCOREP_${language}_ARGUMENTS"
-                            "${arguments_${language}}"
+                            "${arguments}"
                         )
-                    elseif(NOT targetArguments STREQUAL "${arguments_${language}}")
-                        message(FATAL_ERROR "Score-P: target ${target} has SCOREP_${language}_ARGUMENTS already set to '${targetArguments}' instead of '${arguments_${language}}'")
+                    elseif(NOT targetArguments STREQUAL "${arguments}")
+                        message(FATAL_ERROR "Score-P: target ${target} has SCOREP_${language}_ARGUMENTS already set to '${targetArguments}' instead of '${arguments}'")
                     endif()
                 endforeach()
             endif()

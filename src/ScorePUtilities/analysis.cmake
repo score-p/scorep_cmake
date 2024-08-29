@@ -35,7 +35,7 @@ function(_scorep_unionfind_find prefix element result)
             break()
         else()
             # use path splitting
-            set("${prefix}_${root}_PARENT" "${${prefix}_${parent}_PARENT}")
+            set("${prefix}_${root}_PARENT" "${${prefix}_${parent}_PARENT}" PARENT_SCOPE)
             set(root "${parent}")
         endif()
     endwhile()

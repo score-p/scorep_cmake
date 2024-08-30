@@ -57,9 +57,11 @@ The function supports the following keywords:
 
  - `PRIORITY`, a single-value keyword which takes the priority of the settings set by this call
 
- - `AUTO`, an option which enables automatic detection of Score-P arguments using `scorep_infer_arguments` with priority 1500
+ - `AUTO`, an option which enables automatic detection of Score-P arguments using `scorep_infer_arguments`
+   with priority 1500 when calling `scorep_determine_instrumentations`
 
-The function does nothing by itself besides setting the `SCOREP_LANGUAGES` and `SCOREP_<LANG>_SETTING_<SETTING>` properties.
+The function does nothing by itself besides setting the `SCOREP_LANGUAGES`, `SCOREP_<LANG>_SETTING_<SETTING>`
+and `SCOREP_AUTO_LANGUAGES` properties.
 
 The priority passed to `PRIORITY` supports in addition to numerical values:
 
@@ -118,6 +120,8 @@ The function supports the following keywords:
 ### Properties
 
  - `SCOREP_LANGUAGES`, a target property which when defined contains all languages to be instrumented when calling `scorep_enable`.
+
+ - `SCOREP_AUTO_LANGUAGES`, a target property which contains a list of languages for which automatic detection of Score-P arguments is to be performed
 
  - `SCOREP_<LANG>_ARGUMENTS`, a target property which when defined contains the determined arguments for Score-P
 

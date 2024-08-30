@@ -178,8 +178,6 @@ function(_scorep_check_components scorepInfoExecutable resultVar)
             _scorep_check_pattern("\n[ \t]*Compiler instrumentation:[ \t]*yes")
         elseif(component STREQUAL "CUDA")
             _scorep_check_pattern("\n[ \t]*CUDA support:[ \t]*yes")
-        elseif(component STREQUAL "POMP")
-            # TODO
         elseif(component MATCHES "^OMP_(C|CXX|Fortran)$")
             if (CMAKE_MATCH_1 STREQUAL "CXX")
                 set(language "C\\\\+\\\\+")

@@ -67,8 +67,6 @@ Possible values for PARADIGM:
 
 `CUDA`, representing CUDA instrumentation support.
 
-`POMP`, representing POMP user instrumentation support.
-
 `OMP_<LANG>`, representing OpenMP language support.
 
 Possible values for LANG:

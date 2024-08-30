@@ -1,0 +1,16 @@
+#!/bin/sh -e
+
+case $1 in
+    "--version")
+        echo "0.0.0.1"
+        ;;
+    "--prefix")
+        dirname "$(dirname "$0")"
+        ;;
+    *)
+        echo "Invalid dummy arguments" 1>&2
+        exit 1
+        ;;
+esac
+
+exit 0

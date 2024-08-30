@@ -185,6 +185,20 @@ add_test(
 )
 set_property(TEST "Test including the module in script mode" PROPERTY LABELS cmake)
 
+add_test(
+    NAME "Test handling of Alias Targets"
+    COMMAND "${CMAKE_COMMAND}" -E env
+    --modify "PATH=path_list_append:${CMAKE_CURRENT_LIST_DIR}/TestAliasTargets/0.0.0.1/bin"
+    "${CMAKE_COMMAND}"
+    ${TEST_ARGUMENTS}
+    --fresh
+    "-DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/src"
+    -S "${CMAKE_CURRENT_LIST_DIR}/TestAliasTargets"
+    -B "${temporaryDir}/TestAliasTargets"
+)
+set_property(TEST "Test handling of Alias Targets" PROPERTY FIXTURES_REQUIRED tmpdir)
+set_property(TEST "Test handling of Alias Targets" PROPERTY LABELS c)
+
 function(_add_example_tests example labels)
     add_test(
         NAME "Test ${example} example without Score-P"

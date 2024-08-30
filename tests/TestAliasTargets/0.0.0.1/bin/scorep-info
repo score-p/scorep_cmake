@@ -1,0 +1,149 @@
+#!/bin/sh -e
+
+case $1 in
+    "config-summary")
+        cat << EOF
+Configure command:
+  ./configure                   '--prefix=/home/Generic/Projekte/scorep/prefix' \\
+                                '--with-mpi=openmpi' \\
+                                '--with-shmem=openmpi'
+
+Configuration summary:
+  Score-P 8.4:
+    Platform:                   linux (auto detected)
+    Cross compiling:            no (auto detected)
+    Machine name:               Linux
+    otf2 support:               yes, using external via /home/Generic/Projekte/scorep/prefix/bin/otf2-config
+    opari2 support:             yes, using external via /home/Generic/Projekte/scorep/prefix/bin/opari2-config
+    cubew support:              yes, using external via /home/Generic/Projekte/scorep/prefix/bin/cubew-config
+    cubelib support:            yes, using external via /home/Generic/Projekte/scorep/prefix/bin/cubelib-config
+
+    Score-P (backend):
+      C99 compiler:             /usr/bin/gcc (gnu 12.2.0)
+      C++11 compiler:           /usr/bin/g++ -std=c++11 (gnu 12.2.0)
+      Fortran compiler:         /usr/bin/gfortran (gnu)
+      Fortran 77 compiler:      /usr/bin/gfortran
+      Link mode:                static=yes, shared=no
+      Pthread support:          yes, using gcc -pthread -lpthread
+      Compiler instrumentation: yes
+        C:                      gcc_plugin
+        C++:                    gcc_plugin
+        Fortran:                gcc_plugin
+      Compiler constructor:     yes, using attribute syntax with arguments
+      GCC atomic builtins:      yes
+      TLS support:              yes, using __thread
+      addr2line support:        yes
+        libbfd found:           yes, has cplus_demangle
+        dl_iterate_phdr:        yes
+        rtld-audit:             no, needs --enable-shared
+      PAPI support:             no
+      metric perf support:      yes
+      Unwinding support:        yes
+      Sampling support:         yes, using -D_GNU_SOURCE, sa_sigaction
+      getrusage support:        yes
+      RUSAGE_THREAD support:    yes, using -D_GNU_SOURCE
+      dlfcn support:            yes, using -ldl
+      OpenCL support:           yes
+        libOpenCL found:        yes, using -lOpenCL
+      I/O Recording features:
+        POSIX I/O support:      yes
+        POSIX asynchronous I/O support: \\
+                                yes
+      OTF2 features:
+        SIONlib support:        no
+      CUDA support:             yes
+        libcudart found:        no
+        libcuda found:          no
+        libcupti found:         no
+        libnvidia-ml found:     no
+        CUDA version:           unknown
+        nvcc works:             no
+      HIP support:              yes
+        libamdhip64 found:      yes
+        libroctracer64 found:   yes
+        librocm_smi64 found:    yes
+      OpenACC support:          yes, with compiler flag
+      Kokkos support:           yes
+      Mount point extraction:   yes
+      Lustre stripe info support: \\
+                                no, missing lustre/lustreapi.h header
+      OpenMP support:           yes
+        C support:              yes, recognizing -fopenmp --openmp
+        C++ support:            yes, recognizing -fopenmp --openmp
+        Fortran support:        yes, recognizing -fopenmp --openmp
+        OpenMP pomp_tpd:        yes
+        OpenMP ancestry:        yes
+      OMPT support:             yes
+        OMPT header:            yes
+        OMPT tool:              yes
+        OMPT C support:         yes
+        OMPT C++ support:       yes
+        OMPT critical checks passed: \
+                                yes
+        OMPT remediable checks passed: \
+                                no, wrong_test_lock_mutex, missing_work_loop_schedule detected
+        OMPT is default:        no
+      PDT support:              yes
+      Timer support:            yes, providing gettimeofday, clock_gettime(CLOCK_MONOTONIC_RAW), tsc (X86_64)
+        Timer LDFLAGS:          -lm
+      Memory tracking support:  yes
+      Compiler wrappers:        scorep-gcc \\
+                                scorep-g++ \\
+                                scorep-gfortran \\
+                                scorep-mpicc \\
+                                scorep-mpicxx \\
+                                scorep-mpif77 \\
+                                scorep-mpif90 \\
+                                scorep-oshcc \\
+                                scorep-oshfort
+      User library wrappers support: \\
+                                yes
+
+    Score-P (GCC plug-in):
+      C++11 compiler:           /usr/bin/g++ -std=c++11 (gnu 12.2.0)
+      GCC atomic builtins:      yes
+      TLS support:              yes, using __thread and the initial-exec model
+      GCC plug-in support:      yes, using the C++ compiler and -I/usr/lib/gcc/x86_64-linux-gnu/12/plugin/include
+
+    Score-P (libwrap):
+      GCC atomic builtins:      yes
+      TLS support:              yes, using __thread
+      Library wrapper support:  yes, using /usr/bin/llvm-config
+      C99 compiler:             /usr/bin/gcc (gnu 12.2.0)
+      C++11 compiler:           /usr/bin/g++ -std=c++11 (gnu 12.2.0)
+
+    Score-P (MPI backend):
+      MPI C99 compiler:         /usr/bin/mpicc (gnu 12.2.0)
+      MPI C++11 compiler:       /usr/bin/mpicxx -std=c++11 (gnu 12.2.0)
+      MPI Fortran compiler:     /usr/bin/mpif90 (gnu)
+      MPI Fortran 77 compiler:  /usr/bin/mpif77
+      Library used for MPI:
+      PDT MPI instrumentation:  yes, if PDT available
+
+    Score-P (score):
+      C compiler:               /usr/bin/gcc -std=gnu99 (gnu 12.2.0)
+      C++ compiler:             /usr/bin/g++ -std=c++11 (gnu 12.2.0)
+      cube c++ library support: yes, using -I/home/Generic/Projekte/scorep/prefix/include/cubelib -L/home/Generic/Projekte/scorep/prefix/lib \\
+                                -Wl,-rpath -Wl,/home/Generic/Projekte/scorep/prefix/lib -lcube4 -lz -lpthread
+      GCC atomic builtins:      yes
+      TLS support:              yes, using __thread and the initial-exec model
+
+    Score-P (SHMEM backend):
+      SHMEM C99 compiler:       /usr/bin/oshcc (gnu 12.2.0)
+      SHMEM C++11 compiler:     /usr/bin/oshcc -std=c++11 (gnu 12.2.0)
+      SHMEM Fortran compiler:   /usr/bin/oshfort (gnu)
+      SHMEM Fortran 77 compiler: \\
+                                /usr/bin/oshfort
+      Library used for SHMEM:
+      PDT SHMEM instrumentation: \\
+                                yes, if PDT available
+      intercepting SHMEM calls: yes, using SHMEM profiling interface
+EOF
+        ;;
+    *)
+        echo "Invalid dummy arguments" 1>&2
+        exit 1
+        ;;
+esac
+
+exit 0

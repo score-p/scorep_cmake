@@ -174,7 +174,7 @@ function(scorep_instrument targets)
             if (NOT (ARG_OVERRIDE OR existingLauncher STREQUAL "existingLauncher-NOTFOUND"))
                 message(
                     FATAL_ERROR
-                    "Score-P: target ${target} has ${lang}_COMPILER_LAUNCHER already set to ${existingLauncher}"
+                    "Score-P: target ${target} has ${lang}_COMPILER_LAUNCHER already set to ${existingLauncher} "
                     "Please check that the target in not already instrumented by something or unset the property."
                 )
             endif()
@@ -182,7 +182,7 @@ function(scorep_instrument targets)
             if (NOT (ARG_OVERRIDE OR existingLauncher STREQUAL "existingLauncher-NOTFOUND"))
                 message(
                     FATAL_ERROR
-                    "Score-P: target ${target} has ${lang}_LINKER_LAUNCHER already set to ${existingLauncher}"
+                    "Score-P: target ${target} has ${lang}_LINKER_LAUNCHER already set to ${existingLauncher} "
                     "Please check that the target in not already instrumented by something or unset the property."
                 )
             endif()
@@ -235,20 +235,20 @@ function(scorep_mark mode targets)
     _scorep_arguments2settings("${ARG_ARGUMENTS}" "${ARG_PRIORITY}" ARGUMENT)
 
     foreach(target IN LISTS targets)
-        if(ARG_AUTO)
-            set_property(TARGET "${target}" APPEND PROPERTY SCOREP_AUTO_LANGUAGES ${ARG_LANGS})
-        endif()
-        foreach(lang IN LISTS ARG_LANGS)
-            _scorep_settings2properties(ARGUMENT "${lang}" "${target}")
-        endforeach()
-        if(mode STREQUAL "INSTRUMENT")
-            get_target_property(imported "${target}" IMPORTED)
-            get_target_property(aliased "${target}" ALIASED_TARGET)
-            if(imported)
-                message(WARNING "Score-P: imported target '${target}' can not be instrumented")
-            elseif(aliased)
-                message(WARNING "Score-P: alias target '${target}' can not be instrumented")
-            else()
+        get_target_property(imported "${target}" IMPORTED)
+        get_target_property(aliased "${target}" ALIASED_TARGET)
+        if(imported)
+            message(WARNING "Score-P: imported target '${target}' can not be instrumented or marked")
+        elseif(aliased)
+            message(WARNING "Score-P: alias target '${target}' can not be instrumented or marked")
+        else()
+            if(ARG_AUTO)
+                set_property(TARGET "${target}" APPEND PROPERTY SCOREP_AUTO_LANGUAGES ${ARG_LANGS})
+            endif()
+            foreach(lang IN LISTS ARG_LANGS)
+                _scorep_settings2properties(ARGUMENT "${lang}" "${target}")
+            endforeach()
+            if(mode STREQUAL "INSTRUMENT")
                 set_property(TARGET "${target}" APPEND PROPERTY SCOREP_LANGUAGES ${ARG_LANGS})
             endif()
         endif()

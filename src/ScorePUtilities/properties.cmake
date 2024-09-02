@@ -32,6 +32,10 @@ if(__role STREQUAL "PROJECT")
         TARGET PROPERTY "SCOREP_LANGUAGES"
         BRIEF_DOCS "Target property which when defined contains all languages to be instrumented when calling `scorep_enable`."
     )
+    define_property(
+        TARGET PROPERTY "SCOREP_AUTO_LANGUAGES"
+        BRIEF_DOCS "Target property which contains a list of languages for which automatic detection of Score-P arguments is to be performed."
+    )
     foreach(language C CXX Fortran CUDA HIP)
         define_property(
             TARGET PROPERTY "SCOREP_${language}_ARGUMENTS"
